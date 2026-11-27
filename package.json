@@ -1,0 +1,5 @@
+{
+  "name": "drive-board",
+  "private": true,
+  "engines": { "node": ">=18" }
+}
