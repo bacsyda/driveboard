@@ -128,7 +128,7 @@ main{max-width:1500px;margin:0 auto;padding:18px 20px 48px}
 @media (max-width:700px){.nv{top:auto;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:none;width:40px;height:40px}.nv.l{left:calc(50% - 52px)}.nv.r{right:calc(50% - 52px)}}
 .th img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px}.th b{position:relative}.vp{position:relative;background:#000!important;overflow:hidden}.vp iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .loose .card{cursor:pointer}
-.mre{margin-top:8px;text-align:center}@media (max-width:700px){.col:not(.open) .mre{display:none}}
+.mre{display:flex;gap:8px;margin-top:8px}.mre .add{margin-top:0;flex:1;text-align:center}@media (max-width:700px){.col:not(.open) .mre{display:none}}
 </style>
 </head>
 <body>
@@ -282,8 +282,8 @@ fd.addEventListener("contextmenu",e=>{const c=e.target.closest(".card");if(!c||c
   if(e.pointerType!=="touch"&&fine)showMenu({kind:"v",id:c.dataset.id,view:"move",anchor:{right:e.clientX+260,bottom:e.clientY}})});
 fd.addEventListener("click",e=>{
   if(fired){fired=false;return}
-  const mr=e.target.closest(".mre");
-  if(mr){const fc=findCol(mr.previousElementSibling.dataset.col);if(fc){fc.c.rows=(fc.c.rows||4)+4;applyLimits()}return}
+  const mr=e.target.closest(".mre button");
+  if(mr){const l=mr.parentElement.previousElementSibling,fc=findCol(l.dataset.col);if(fc){const less=mr.dataset.a==="less";fc.c.rows=less?4:(fc.c.rows||4)+4;applyLimits();if(less)l.closest(".col,.loose").scrollIntoView({block:"nearest",behavior:"smooth"})}return}
   const d=e.target.closest(".dots");
   if(d){const r=d.getBoundingClientRect(),k=d.closest(".card");
     return showMenu(k?{kind:"v",id:k.dataset.id,view:"main",anchor:r}:{kind:"c",id:d.closest(".col").dataset.col,view:"main",anchor:r})}
@@ -360,8 +360,9 @@ function applyLimits(){
     const cs=[...l.children],n=Math.max(1,getComputedStyle(l).gridTemplateColumns.split(" ").length),lim=(fc.c.rows||4)*n;
     cs.forEach((c,i)=>c.style.display=i<lim?"":"none");
     let b=l.nextElementSibling;if(b&&!b.classList.contains("mre"))b=null;
-    const rest=cs.length-lim;
-    if(rest>0){if(!b){b=document.createElement("button");b.className="add mre";l.after(b)}b.textContent="Xem thêm ("+rest+")"}
+    const rest=cs.length-lim,ex=(fc.c.rows||4)>4&&cs.length>4*n;
+    if(rest>0||ex){if(!b){b=document.createElement("div");b.className="mre";l.after(b)}
+      b.innerHTML=(rest>0?`<button class="add" data-a="more">Xem thêm (${rest})</button>`:"")+(ex?`<button class="add" data-a="less">Thu gọn</button>`:"")}
     else if(b)b.remove();
   })}
 let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(applyLimits,150)});
