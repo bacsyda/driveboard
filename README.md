@@ -10,8 +10,8 @@ Cấu trúc thư mục Drive:
 
 ## Thứ tự hiển thị
 
-- Folder con có tên dạng "Tuần N ..." nằm trên cùng, tuần số lớn nhất trước.
-  Folder con khác nằm sau, xếp theo tên Z→A. Mục "File lẻ" nằm cuối.
+- Folder con có tên dạng "Tuần N ..." nằm trên cùng, folder khác nằm sau. Trong mỗi nhóm
+  xếp theo ngày tạo folder (createdTime), mới nhất trước. Mục "File lẻ" nằm cuối.
 - Cột trong mỗi bảng xếp theo thời gian tạo folder (cũ → mới).
 - Video trong cột xếp mới nhất trước.
 

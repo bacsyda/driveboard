@@ -108,8 +108,8 @@ main{max-width:1500px;margin:0 auto;padding:18px 20px 48px}
 .vt .btn{background:rgba(255,255,255,.1);border-color:transparent;color:#fff;flex:none}
 .vt .btn:hover{background:rgba(255,255,255,.2)}
 .vt .btn.pri{background:#f1f1f1;color:#0a0a0a}
-.vb{position:relative;flex:1;min-height:0;display:grid;place-items:center;padding:0 16px calc(16px + env(safe-area-inset-bottom,0px))}
-.vp{position:relative;width:100%;max-width:calc((100vh - 110px)*16/9);max-width:calc((100dvh - 110px)*16/9);aspect-ratio:16/9;max-height:100%;border-radius:12px;overflow:hidden;display:grid;place-items:center;color:#fff}
+.vb{position:relative;flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);padding:0 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.vp{position:relative;min-width:0;min-height:0;border-radius:12px;overflow:hidden;display:grid;place-items:center;color:#fff}
 .pl{width:76px;height:76px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;padding-left:4px}
 .vc{position:absolute;left:0;right:0;bottom:0;padding:14px 16px;display:flex;align-items:center;gap:12px;font-size:12px;background:linear-gradient(transparent,rgba(0,0,0,.55))}
 .vc i{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.3)}
@@ -117,7 +117,7 @@ main{max-width:1500px;margin:0 auto;padding:18px 20px 48px}
 .nv:hover:not(:disabled){background:rgba(255,255,255,.26)}
 .nv:disabled{opacity:.25;cursor:default}
 .nv.l{left:14px}.nv.r{right:14px}
-@media (max-width:700px){.nv{top:auto;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:none;width:40px;height:40px}.nv.l{left:calc(50% - 52px)}.nv.r{right:calc(50% - 52px)}}
+@media (max-width:700px){.vb{grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) auto;gap:10px;padding:0 10px calc(12px + env(safe-area-inset-bottom,0px))}.vp{grid-column:1/-1;grid-row:1;border-radius:10px}.nv{position:static;transform:none;width:100%;height:44px;border-radius:12px;grid-row:2}.nv.l{grid-column:1}.nv.r{grid-column:2}}
 .th img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px;pointer-events:none;-webkit-user-drag:none}.th b{position:relative}.vp{position:relative;background:#000!important;overflow:hidden}.vp iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .loose .card{cursor:pointer}
 .mre{display:flex;gap:8px;margin-top:8px}.mre .add{margin-top:0;flex:1;text-align:center}@media (max-width:700px){.col:not(.open) .mre{display:none}}
@@ -303,8 +303,8 @@ async function api(p,o={},retry=1){
   if(!r.ok)throw new Error(r.status);return r.status===204?null:r.json()}
 async function ls(q,f){let out=[],t="";do{const r=await api("files?q="+encodeURIComponent(q)+"&fields="+encodeURIComponent("nextPageToken,files("+f+")")+"&pageSize=1000&orderBy=createdTime"+(t?"&pageToken="+t:""));out=out.concat(r.files);t=r.nextPageToken}while(t);return out}
 const dl=v=>window.open("https://drive.google.com/uc?export=download&id="+v.id,"_blank");
-// folder "Tuần N ..." lên đầu, tuần lớn nhất trước; folder khác xếp sau theo tên Z→A
-const wkNo=n=>{const m=n.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/gi,"d").toLowerCase().match(/tuan\s*(\d+)/);return m?+m[1]:-1};
+// folder "Tuần N ..." lên đầu, rồi folder khác; mỗi nhóm xếp theo ngày tạo, mới nhất trước
+const isWk=n=>/tuan\s*\d+/.test(n.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/gi,"d").toLowerCase());
 const hue=s=>[...s].reduce((a,c)=>a+c.charCodeAt(0),0)*37%360;
 const vid=f=>{const m=f.name.match(/\.[^.]+$/),d=Math.round((f.videoMediaMetadata&&f.videoMediaMetadata.durationMillis||0)/1000);
   return{id:f.id,img:(f.mimeType||"").startsWith("image/"),title:m?f.name.slice(0,-m[0].length):f.name,ext:m?m[0]:"",dur:d?Math.floor(d/60)+":"+String(d%60).padStart(2,"0"):"",mb:Math.round((f.size||0)/1048576),h:hue(f.id),th:f.thumbnailLink?f.thumbnailLink.replace(/=s\d+$/,"=s400"):""}};
@@ -324,7 +324,7 @@ async function loadMore(){
 async function connect(){
   $("#feed").innerHTML="";boards.length=0;wi=0;
   try{
-    weeks=(await ls(`'${ROOT}' in parents and mimeType='${FOLD}' and trashed=false`,"id,name")).map(f=>({fid:f.id,name:f.name})).sort((a,b)=>{const x=wkNo(a.name),y=wkNo(b.name);return (y>=0)-(x>=0)||y-x||b.name.localeCompare(a.name,"vi",{numeric:true})});
+    weeks=(await ls(`'${ROOT}' in parents and mimeType='${FOLD}' and trashed=false`,"id,name,createdTime")).map(f=>({fid:f.id,name:f.name,ct:f.createdTime||""})).sort((a,b)=>isWk(b.name)-isWk(a.name)||b.ct.localeCompare(a.ct));
     const rv=await ls(`'${ROOT}' in parents and ${MT} and trashed=false`,FV);
     looseB={id:"root",fid:ROOT,loose:true,cols:[{id:ROOT,t:"",items:rv.reverse().map(vid)}]};
   }
