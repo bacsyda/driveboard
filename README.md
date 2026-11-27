@@ -3,10 +3,23 @@
 Cấu trúc thư mục Drive:
 
     Folder gốc
-    ├── file lẻ (video/ảnh)     → hiện ở mục "File lẻ" trên cùng
+    ├── file lẻ (video/ảnh)     → hiện ở mục "File lẻ" dưới cùng trang
     ├── Folder con              → bảng
     │   └── Folder cháu         → cột
     │       └── video / ảnh
+
+## Thứ tự hiển thị
+
+- Folder con có tên dạng "Tuần N ..." nằm trên cùng, tuần số lớn nhất trước.
+  Folder con khác nằm sau, xếp theo tên Z→A. Mục "File lẻ" nằm cuối.
+- Cột trong mỗi bảng xếp theo thời gian tạo folder (cũ → mới).
+- Video trong cột xếp mới nhất trước.
+
+## Kéo thả
+
+- Máy tính: kéo thẻ sang cột khác; kéo ra vùng trống để thành file lẻ.
+- Điện thoại: nhấn giữ thẻ khoảng 0,2 giây rồi kéo. Rê vào cột đang đóng một lúc
+  thì cột tự mở. Hoặc chạm ⋮ → "Chuyển đến cột…" / "Chuyển thành file lẻ".
 
 ## Cấu trúc dự án
 
